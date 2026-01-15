@@ -1,9 +1,0 @@
-{
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "https://docs.google.com/forms/d/e/1FAIpQLSeJ9pTVtvV8IDU5Gjub6YzKl5xrG4klB-RgPFGaKdfJRSNI7g/viewform",
-      "permanent": true
-    }
-  ]
-}

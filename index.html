@@ -1,7 +1,162 @@
 <!DOCTYPE html>
-<html>
-<head><title>Redirecting...</title></head>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- SEO Meta Tags -->
+  <title>Pendaftaran DCN UNIRA - Dicoding Community Network Universitas Madura</title>
+  <meta name="description"
+    content="Daftar menjadi anggota Dicoding Community Network Universitas Madura (DCN UNIRA). Bergabunglah dengan komunitas">
+  <meta name="keywords"
+    content="DCN UNIRA, Dicoding Community Network, Universitas Madura, Pendaftaran, Akademisi, Peneliti">
+  <meta name="author" content="DCN UNIRA">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Pendaftaran DCN UNIRA">
+  <meta property="og:description" content="Bergabunglah dengan Dicoding Community Network Universitas Madura">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pendaftaran.dcnunira.dev">
+  <meta property="og:image" content="https://dcnunira.dev/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="https://dcnunira.dev/favicon.ico">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
 <body>
-  <p>Sedang mengalihkan ke form pendaftaran...</p>
+  <!-- Animated Background -->
+  <div class="background-animation"></div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header Section -->
+    <header class="header">
+      <div class="logo-container">
+        <h1 class="logo">Pendaftaran DCN UNIRA</h1>
+      </div>
+      <p class="subtitle">Dicoding Community Network Universitas Madura</p>
+      <p class="tagline">Membangun Masa Depan Melalui Ilmu Pengetahuan</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Info Cards Section -->
+      <section class="info-section">
+        <div class="info-card">
+          <div class="info-icon">📚</div>
+          <h3 class="info-title">Pendidikan Berkualitas</h3>
+          <p class="info-description">Bergabung dengan komunitas belajar ilmu pengetahuan dan teknologi</p>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">🔬</div>
+          <h3 class="info-title">Pengembangan Skill</h3>
+          <p class="info-description">kalian akan mendapatkan kelas dasar Gen AI dari dicoding indonesia</p>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">🤝</div>
+          <h3 class="info-title">Kolaborasi</h3>
+          <p class="info-description">Jaringan luas dengan kontributor Dicoding Community Network Universitas Madura dan
+            Dicoding Community Network lainnya</p>
+        </div>
+      </section>
+
+      <!-- Registration Form Section -->
+      <section class="glass-card">
+        <h2 class="section-title">Formulir Pendaftaran</h2>
+        <div class="form-container">
+          <iframe
+            src="https://docs.google.com/forms/d/e/1FAIpQLSeJ9pTVtvV8IDU5Gjub6YzKl5xrG4klB-RgPFGaKdfJRSNI7g/viewform?embedded=true"
+            class="google-form-iframe" title="Formulir Pendaftaran DCN UNIRA" loading="lazy"
+            aria-label="Formulir Pendaftaran kontributor DCN UNIRA">
+            Memuat formulir...
+          </iframe>
+        </div>
+      </section>
+
+      <!-- Additional Info -->
+      <section class="glass-card">
+        <h2 class="section-title">Tentang DCN Unira</h2>
+        <div style="padding: 1rem; text-align: center; line-height: 1.8;">
+          <p style="color: rgba(255, 255, 255, 0.85); font-size: 1.05rem; margin-bottom: 1rem;">
+            Dicoding Community Network Universitas Madura (DCN UNIRA) adalah komunitas mahasiswa yang di support
+            langsung dicoding indonesia yang fokus pada pengembangan skill programming dan teknologi.
+          </p>
+          <p style="color: rgba(255, 255, 255, 0.75); font-size: 0.95rem;">
+            Dengan bergabung bersama DCN Unira, Anda akan menjadi bagian dari komunitas yang berkomitmen untuk terus
+            berkontribusi dalam pengembangan ilmu pengetahuan, teknologi bersama Dicoding Indonesia
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2026 DCN UNIRA. All rights reserved.</p>
+      <p>
+        <a href="https://dcnunira.dev" target="_blank" rel="noopener noreferrer">dcnunira.dev</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Smooth Scroll Script -->
+  <script>
+    // Add smooth scroll behavior for better UX
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Add loading state for iframe
+    const iframe = document.querySelector('.google-form-iframe');
+    if (iframe) {
+      iframe.addEventListener('load', function () {
+        console.log('Form loaded successfully');
+      });
+    }
+
+    // Add intersection observer for animation on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe all cards
+    document.querySelectorAll('.info-card, .glass-card').forEach(card => {
+      observer.observe(card);
+    });
+  </script>
 </body>
+
 </html>
