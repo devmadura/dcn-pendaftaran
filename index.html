@@ -3,33 +3,33 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <!-- SEO Meta Tags -->
-  <title>Pendaftaran DCN UNIRA - Dicoding Community Network Universitas Madura</title>
+  <title>Pendaftaran - Dicoding Community Network Universitas Madura</title>
   <meta name="description"
-    content="Daftar menjadi anggota Dicoding Community Network Universitas Madura (DCN UNIRA). Bergabunglah dengan komunitas">
+    content="Bergabung dengan DCN Unira - Dicoding Community Network Universitas Madura. Komunitas developer untuk belajar programming, web development, mobile development, dan teknologi gratis!">
   <meta name="keywords"
-    content="pendaftran DCN UNIRA, pendaftaran Dicoding Community Network, pendaftaran Universitas Madura, Pendaftaran, pendaftarana dcn unira, pendaftaran kontributor dcn unira, pendaftaran unira, pendataran unira dcn, pendaftaran dcn">
-  <meta name="author" content="DCN UNIRA">
+    content="DCN Unira, Dicoding Community, Universitas Madura, Programming, Developer, Bootcamp, Coding, Tech Community">
+  <meta name="author" content="DCN Unira">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph Meta Tags -->
-  <meta property="og:title" content="Pendaftaran DCN UNIRA">
-  <meta property="og:description" content="Bergabunglah dengan Dicoding Community Network Universitas Madura">
+  <meta property="og:title" content="Pendaftaran DCN Unira">
+  <meta property="og:description"
+    content="Bergabung dengan Dicoding Community Network Universitas Madura - Komunitas Developer">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://pendaftaran.dcnunira.dev">
-  <meta property="og:image" content="https://dcnunira.dev/og-image.png">
+  <meta property="og:url" content="https://dcnunira.dev">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="https://dcnunira.dev/favicon.ico">
+  <link rel="icon" type="image/icon" href="https://dcnunira.dev/favicon.ico">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Roboto:wght@300;400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
 
   <!-- Stylesheet -->
@@ -37,42 +37,69 @@
 </head>
 
 <body>
-  <!-- Animated Background -->
-  <div class="background-animation"></div>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Elegant Background -->
+  <div class="background-wrapper">
+    <div class="background-gradient"></div>
+    <div class="background-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+  </div>
 
   <!-- Main Container -->
   <div class="container">
     <!-- Header Section -->
     <header class="header">
-      <div class="logo-container">
-        <h1 class="logo">Pendaftaran DCN UNIRA</h1>
+      <!-- Logos Container -->
+      <div class="logos-container">
+        <a href="https://dcnunira.dev" target="_blank" rel="noopener noreferrer" class="logo-link logo-link-1">
+          <img src="dcn-unira.png" alt="DCN Unira Logo" class="logo-image">
+        </a>
+        <a href="https://unira.ac.id" target="_blank" rel="noopener noreferrer" class="logo-link logo-link-2">
+          <img src="unira-logo.png" alt="Universitas Madura Logo" class="logo-image" style="width: 80px;">
+        </a>
+      </div>
+
+      <div class="logo-wrapper">
+        <div class="logo-decoration"></div>
+        <h1 class="logo">DCN UNIRA</h1>
       </div>
       <p class="subtitle">Dicoding Community Network Universitas Madura</p>
-      <p class="tagline">Membangun Masa Depan Melalui Ilmu Pengetahuan</p>
+      <div class="divider"></div>
+      <p class="tagline">Belajar Programming Gratis, Sertifikasi Gratis, Tumbuh Bersama!</p>
     </header>
 
     <!-- Main Content -->
     <main class="main-content">
       <!-- Info Cards Section -->
       <section class="info-section">
-        <div class="info-card">
-          <div class="info-icon">📚</div>
-          <h3 class="info-title">Pendidikan Berkualitas</h3>
-          <p class="info-description">Bergabung dengan komunitas belajar ilmu pengetahuan dan teknologi</p>
-        </div>
+        <article class="info-card">
+          <div class="info-icon">💻</div>
+          <h3 class="info-title">Bootcamp Gratis</h3>
+          <p class="info-description">Belajar Web Development, Mobile Development, Data Science & AI secara gratis</p>
+        </article>
 
-        <div class="info-card">
-          <div class="info-icon">🔬</div>
-          <h3 class="info-title">Pengembangan Skill</h3>
-          <p class="info-description">kalian akan mendapatkan kelas dasar Gen AI dari dicoding indonesia</p>
-        </div>
+        <article class="info-card">
+          <div class="info-icon">🎓</div>
+          <h3 class="info-title">Sertifikasi Gratis</h3>
+          <p class="info-description">Dapatkan sertifikasi dari Dicoding Indonesia (Google Authorized Training Partner)
+          </p>
+        </article>
 
-        <div class="info-card">
+        <article class="info-card">
           <div class="info-icon">🤝</div>
-          <h3 class="info-title">Kolaborasi</h3>
-          <p class="info-description">Jaringan luas dengan kontributor Dicoding Community Network Universitas Madura dan
-            Dicoding Community Network lainnya</p>
-        </div>
+          <h3 class="info-title">Study Group</h3>
+          <p class="info-description">Belajar bareng, code review, dan build project kolaboratif dengan sesama developer
+          </p>
+        </article>
       </section>
 
       <!-- Registration Form Section -->
@@ -81,24 +108,25 @@
         <div class="form-container">
           <iframe
             src="https://docs.google.com/forms/d/e/1FAIpQLSeJ9pTVtvV8IDU5Gjub6YzKl5xrG4klB-RgPFGaKdfJRSNI7g/viewform?embedded=true"
-            class="google-form-iframe" title="Formulir Pendaftaran DCN UNIRA" loading="lazy"
-            aria-label="Formulir Pendaftaran kontributor DCN UNIRA">
+            class="google-form-iframe" title="Formulir Pendaftaran DCN Unira" loading="lazy" frameborder="0"
+            marginheight="0" marginwidth="0" aria-label="Formulir Pendaftaran Anggota DCN Unira">
             Memuat formulir...
           </iframe>
         </div>
       </section>
 
-      <!-- Additional Info -->
+      <!-- About Section -->
       <section class="glass-card">
         <h2 class="section-title">Tentang DCN Unira</h2>
-        <div style="padding: 1rem; text-align: center; line-height: 1.8;">
-          <p style="color: rgba(255, 255, 255, 0.85); font-size: 1.05rem; margin-bottom: 1rem;">
-            Dicoding Community Network Universitas Madura (DCN UNIRA) adalah komunitas mahasiswa yang di support
-            langsung dicoding indonesia yang fokus pada pengembangan skill programming dan teknologi.
+        <div class="about-content">
+          <p class="about-text">
+            DCN UNIRA (Dicoding Community Network Universitas Madura) adalah komunitas developer dan tech enthusiast
+            yang didukung oleh Dicoding Indonesia. Kami menyediakan akses pembelajaran teknologi yang berkualitas dan
+            terjangkau untuk mahasiswa Universitas Madura.
           </p>
-          <p style="color: rgba(255, 255, 255, 0.75); font-size: 0.95rem;">
-            Dengan bergabung bersama DCN Unira, Anda akan menjadi bagian dari komunitas yang berkomitmen untuk terus
-            berkontribusi dalam pengembangan ilmu pengetahuan, teknologi bersama Dicoding Indonesia
+          <p class="about-text-secondary">
+            Dengan bergabung, kamu akan mendapatkan akses ke bootcamp intensif (Web Dev, Mobile Dev, Data Science, AI),
+            study group, mentoring, dan sertifikasi GRATIS dari Dicoding Indonesia. Mari belajar dan tumbuh bersama!
           </p>
         </div>
       </section>
@@ -106,16 +134,24 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <p>&copy; 2026 DCN UNIRA. All rights reserved.</p>
-      <p>
+      <p class="footer-text">&copy; 2026 DCN Unira. All rights reserved.</p>
+      <p class="footer-text">
         <a href="https://dcnunira.dev" target="_blank" rel="noopener noreferrer">dcnunira.dev</a>
       </p>
     </footer>
   </div>
 
-  <!-- Smooth Scroll Script -->
+  <!-- Scripts -->
   <script>
-    // Add smooth scroll behavior for better UX
+    // Hide loading overlay when page is loaded
+    window.addEventListener('load', function () {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      setTimeout(() => {
+        loadingOverlay.classList.add('hidden');
+      }, 500);
+    });
+
+    // Smooth scroll behavior
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -129,18 +165,22 @@
       });
     });
 
-    // Add loading state for iframe
+    // Iframe load tracking
     const iframe = document.querySelector('.google-form-iframe');
     if (iframe) {
       iframe.addEventListener('load', function () {
-        console.log('Form loaded successfully');
+        console.log('✅ Form loaded successfully');
+      });
+
+      iframe.addEventListener('error', function () {
+        console.error('❌ Error loading form');
       });
     }
 
-    // Add intersection observer for animation on scroll
+    // Intersection Observer for scroll animations
     const observerOptions = {
       threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      rootMargin: '0px 0px -100px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -152,10 +192,54 @@
       });
     }, observerOptions);
 
-    // Observe all cards
-    document.querySelectorAll('.info-card, .glass-card').forEach(card => {
-      observer.observe(card);
+    // Observe elements for animation
+    document.querySelectorAll('.info-card, .glass-card').forEach(element => {
+      observer.observe(element);
     });
+
+    // Parallax effect for background
+    let ticking = false;
+
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        window.requestAnimationFrame(function () {
+          const scrolled = window.pageYOffset;
+          const parallax = document.querySelector('.background-gradient');
+
+          if (parallax) {
+            parallax.style.transform = `translateY(${scrolled * 0.3}px)`;
+          }
+
+          ticking = false;
+        });
+
+        ticking = true;
+      }
+    });
+
+    // Add hover effect sound feedback (optional - visual only)
+    document.querySelectorAll('.info-card').forEach(card => {
+      card.addEventListener('mouseenter', function () {
+        this.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      });
+    });
+
+    // Performance optimization: Lazy load iframe
+    if ('IntersectionObserver' in window) {
+      const iframeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const iframe = entry.target;
+            if (iframe.dataset.src) {
+              iframe.src = iframe.dataset.src;
+              iframeObserver.unobserve(iframe);
+            }
+          }
+        });
+      });
+
+      // Note: If you want to enable lazy loading, change src to data-src in HTML
+    }
   </script>
 </body>
 
