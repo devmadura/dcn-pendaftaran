@@ -4,5 +4,12 @@
         "deploymentEnabled": {
             "dev": false
         }
-    }
+    },
+    "outputDirectory": ".",
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
+    ]
 }
