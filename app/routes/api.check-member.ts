@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { supabaseMainAdmin } from "../lib/supabaseMain";
+import { getSupabaseMainAdmin } from "../lib/supabaseMain";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -10,7 +10,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return Response.json({ active: false });
   }
 
-  const { data: oldMember } = await supabaseMainAdmin
+  const { data: oldMember } = await getSupabaseMainAdmin()
     .from('kontributor')
     .select('nim, email')
     .eq('nim', nim)

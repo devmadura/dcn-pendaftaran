@@ -9,32 +9,38 @@ import { ProfileCard } from "../components/dashboard/ProfileCard";
 import { StatusCard } from "../components/dashboard/StatusCard";
 import { BiodataForm } from "../components/dashboard/BiodataForm";
 import { AdminPanel } from "../components/dashboard/AdminPanel";
-import { supabaseMainAdmin } from "../lib/supabaseMain";
+import { getSupabaseMainAdmin } from "../lib/supabaseMain";
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
-  if (intent === 'sync') {
+  if (intent === "sync") {
     let synced = 0;
     let skipped = 0;
 
     const { data: activeAccounts, error: fetchError } = await supabase
-      .from('accounts')
-      .select('*')
-      .eq('status', 'active');
+      .from("accounts")
+      .select("*")
+      .eq("status", "active");
 
     if (fetchError || !activeAccounts) {
-      return { syncResult: { synced: 0, skipped: 0, message: "Gagal mengambil data akun aktif dari portal" } };
+      return {
+        syncResult: {
+          synced: 0,
+          skipped: 0,
+          message: "Gagal mengambil data akun aktif dari portal",
+        },
+      };
     }
 
     for (const account of activeAccounts) {
       if (!account.nim) continue;
 
-      const { data: existing, error: checkError } = await supabaseMainAdmin
-        .from('kontributor')
-        .select('id')
-        .eq('nim', account.nim)
+      const { data: existing, error: checkError } = await getSupabaseMainAdmin()
+        .from("kontributor")
+        .select("id")
+        .eq("nim", account.nim)
         .maybeSingle();
 
       if (checkError) {
@@ -45,16 +51,16 @@ export async function action({ request }: Route.ActionArgs) {
       if (existing) {
         skipped++;
       } else {
-        const { error: insertError } = await supabaseMainAdmin
-          .from('kontributor')
+        const { error: insertError } = await getSupabaseMainAdmin()
+          .from("kontributor")
           .insert({
             nim: account.nim,
             email: account.email,
             nama: account.nama,
             angkatan: account.angkatan,
             prodi: account.prodi,
-            total_poin: 0
-          });
+            total_poin: 0,
+          } as any);
 
         if (insertError) {
           console.error("Error inserting to main DB:", insertError);
@@ -64,16 +70,25 @@ export async function action({ request }: Route.ActionArgs) {
       }
     }
 
-    return { syncResult: { synced, skipped, message: `Sinkronisasi selesai: ${synced} ditambahkan, ${skipped} dilewati.` } };
+    return {
+      syncResult: {
+        synced,
+        skipped,
+        message: `Sinkronisasi selesai: ${synced} ditambahkan, ${skipped} dilewati.`,
+      },
+    };
   }
 
   return null;
 }
 
-export function meta({ }: Route.MetaArgs) {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: "Dashboard Kontributor DCN Universitas Madura" },
-    { name: "description", content: "portal kontributor DCN Universitas Madura" },
+    {
+      name: "description",
+      content: "portal kontributor DCN Universitas Madura",
+    },
   ];
 }
 
@@ -89,27 +104,29 @@ export default function Dashboard() {
     angkatan: "",
     prodi: "",
     isProfileComplete: false,
-    isAdmin: false
+    isAdmin: false,
   });
 
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchUserData() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const { data: profile } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', session.user.id)
+        .from("accounts")
+        .select("*")
+        .eq("user_id", session.user.id)
         .single();
 
       if (profile) {
         const { data: adminCheck } = await supabase
-          .from('admin')
-          .select('id')
-          .eq('user_id', session.user.id)
+          .from("admin")
+          .select("id")
+          .eq("user_id", session.user.id)
           .maybeSingle();
 
         const isAdmin = !!adminCheck;
@@ -121,16 +138,20 @@ export default function Dashboard() {
           nim: profile.nim,
           angkatan: profile.angkatan,
           prodi: profile.prodi,
-          isProfileComplete: !!(profile.nim && profile.angkatan && profile.prodi),
-          isAdmin
+          isProfileComplete: !!(
+            profile.nim &&
+            profile.angkatan &&
+            profile.prodi
+          ),
+          isAdmin,
         });
 
         if (isAdmin) {
           const { data: pendingData } = await supabase
-            .from('accounts')
-            .select('*')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false });
+            .from("accounts")
+            .select("*")
+            .eq("status", "pending")
+            .order("created_at", { ascending: false });
 
           if (pendingData) setPendingUsers(pendingData);
         }
@@ -146,22 +167,32 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const handleReviewUser = async (accountId: number, newStatus: 'active' | 'rejected') => {
-    const { data, error } = await supabase.from('accounts').update({ status: newStatus }).eq('id', accountId).select('id').single();
+  const handleReviewUser = async (
+    accountId: number,
+    newStatus: "active" | "rejected",
+  ) => {
+    const { data, error } = await supabase
+      .from("accounts")
+      .update({ status: newStatus })
+      .eq("id", accountId)
+      .select("id")
+      .single();
     if (!error && data) {
-      setPendingUsers(prev => prev.filter(u => u.id !== accountId));
+      setPendingUsers((prev) => prev.filter((u) => u.id !== accountId));
     } else {
-      alert(`Gagal update (Kemungkinan ditolak pengaturan RLS): ${error?.message || "Data tidak ditemukan"}`);
+      alert(
+        `Gagal update (Kemungkinan ditolak pengaturan RLS): ${error?.message || "Data tidak ditemukan"}`,
+      );
       console.error("Supabase update error:", error);
     }
   };
 
   const handleBiodataSuccess = (nim: string, angkatan: string) => {
-    setUserData(p => ({
+    setUserData((p) => ({
       ...p,
       nim,
       angkatan,
-      isProfileComplete: !!(nim && angkatan && p.prodi)
+      isProfileComplete: !!(nim && angkatan && p.prodi),
     }));
   };
 
@@ -172,8 +203,14 @@ export default function Dashboard() {
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-8 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/dcn-unira.png" alt="DCN" className="w-[32px] h-[32px] object-contain" />
-            <span className="font-display font-semibold hidden sm:block">Dashboard Portal Kontributor DCN</span>
+            <img
+              src="/dcn-unira.png"
+              alt="DCN"
+              className="w-8 h-8 object-contain"
+            />
+            <span className="font-display font-semibold hidden sm:block">
+              Dashboard Portal Kontributor DCN
+            </span>
           </div>
           <button
             onClick={handleLogout}
@@ -187,14 +224,25 @@ export default function Dashboard() {
 
       <main className="min-h-screen pt-28 pb-12 px-4 md:px-8 max-w-6xl mx-auto">
         {userData.isAdmin ? (
-          <AdminPanel pendingUsers={pendingUsers} onReviewUser={handleReviewUser} />
+          <AdminPanel
+            pendingUsers={pendingUsers}
+            onReviewUser={handleReviewUser}
+          />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <ProfileCard mounted={mounted} userData={userData} />
 
-            <div className={`lg:col-span-8 flex flex-col gap-6 transition-all duration-700 delay-200 transform ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-              <StatusCard status={userData.status} isProfileComplete={userData.isProfileComplete} />
-              <BiodataForm isProfileComplete={userData.isProfileComplete} onSuccess={handleBiodataSuccess} />
+            <div
+              className={`lg:col-span-8 flex flex-col gap-6 transition-all duration-700 delay-200 transform ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            >
+              <StatusCard
+                status={userData.status}
+                isProfileComplete={userData.isProfileComplete}
+              />
+              <BiodataForm
+                isProfileComplete={userData.isProfileComplete}
+                onSuccess={handleBiodataSuccess}
+              />
             </div>
           </div>
         )}

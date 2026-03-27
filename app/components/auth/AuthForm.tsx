@@ -1,5 +1,10 @@
 import { useState, useEffect, type FormEvent } from "react";
-import { IconLoader2, IconCheck, IconX, IconChevronDown } from "@tabler/icons-react";
+import {
+  IconLoader2,
+  IconChevronDown,
+  IconXboxX,
+  IconCircleCheck,
+} from "@tabler/icons-react";
 import { z } from "zod";
 import { cn } from "../../lib/utils";
 import { supabase } from "../../lib/supabase";
@@ -29,10 +34,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
   const { prodiList, loading: loadingProdi } = useProdiData();
 
   useEffect(() => {
-    if (!isLoginMode && nimValidity === 'valid') {
+    if (!isLoginMode && nimValidity === "valid") {
       if (nim.length >= 4) setAngkatan(nim.substring(0, 4));
-      setErrors(p => ({ ...p, angkatan: undefined }));
-    } else if (!isLoginMode && nimValidity === 'invalid') {
+      setErrors((p) => ({ ...p, angkatan: undefined }));
+    } else if (!isLoginMode && nimValidity === "invalid") {
       setAngkatan("");
     }
   }, [nimValidity, nim, isLoginMode]);
@@ -46,10 +51,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
   }, [isLoginMode]);
 
   useEffect(() => {
-    const loginError = sessionStorage.getItem('login_error');
+    const loginError = sessionStorage.getItem("login_error");
     if (loginError) {
       setServerError(loginError);
-      sessionStorage.removeItem('login_error');
+      sessionStorage.removeItem("login_error");
     }
   }, []);
 
@@ -64,7 +69,13 @@ export function AuthForm({ mounted }: AuthFormProps) {
       } else {
         const registerSchema = createRegisterSchema(nimValidity, studentName);
         registerSchema.parse({
-          nim, nama, angkatan, prodi, email, password, confirmPassword
+          nim,
+          nama,
+          angkatan,
+          prodi,
+          email,
+          password,
+          confirmPassword,
         });
       }
       setErrors({});
@@ -85,14 +96,22 @@ export function AuthForm({ mounted }: AuthFormProps) {
     setLoading(true);
 
     if (!isLoginMode) {
-      const { data: existingNim } = await supabase.from('accounts').select('id').eq('nim', nim).maybeSingle();
+      const { data: existingNim } = await supabase
+        .from("accounts")
+        .select("id")
+        .eq("nim", nim)
+        .maybeSingle();
       if (existingNim) {
         setServerError("NIM sudah terdaftar, hubungi admin jika ini kesalahan");
         setLoading(false);
         return;
       }
 
-      const { data: existingEmail } = await supabase.from('accounts').select('id').eq('email', email).maybeSingle();
+      const { data: existingEmail } = await supabase
+        .from("accounts")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
       if (existingEmail) {
         setServerError("Email sudah digunakan");
         setLoading(false);
@@ -111,28 +130,29 @@ export function AuthForm({ mounted }: AuthFormProps) {
       }
 
       if (authData.user) {
-        let finalStatus = 'pending';
-        let messageForm = 'Pendaftaran berhasil! Tunggu persetujuan admin sebelum bisa login.';
+        let finalStatus = "pending";
+        let messageForm =
+          "Pendaftaran berhasil! Tunggu persetujuan admin sebelum bisa login.";
         try {
           const urlStr = `/api/check-member?nim=${encodeURIComponent(nim)}&email=${encodeURIComponent(email)}`;
           const checkRes = await fetch(urlStr);
           const checkData = await checkRes.json();
           if (checkData.active) {
-            finalStatus = 'active';
-            messageForm = 'Pendaftaran berhasil, silahkan login.';
+            finalStatus = "active";
+            messageForm = "Pendaftaran berhasil, silahkan login.";
           }
         } catch (e) {
           console.error("Gagal verifikasi status member dari DB utama:", e);
         }
 
-        const { error: insertError } = await supabase.from('accounts').insert({
+        const { error: insertError } = await supabase.from("accounts").insert({
           user_id: authData.user.id,
           nim,
           email,
           nama,
           angkatan,
           prodi: prodi.toLowerCase(),
-          status: finalStatus
+          status: finalStatus,
         });
 
         if (insertError) {
@@ -150,9 +170,15 @@ export function AuthForm({ mounted }: AuthFormProps) {
       }
       setLoading(false);
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) {
-        if (error.message.includes("Email not confirmed") || error.message.toLowerCase().includes("verify")) {
+        if (
+          error.message.includes("Email not confirmed") ||
+          error.message.toLowerCase().includes("verify")
+        ) {
           setServerError("Verifikasi email kamu terlebih dahulu");
         } else {
           setServerError("Email atau password salah");
@@ -164,8 +190,13 @@ export function AuthForm({ mounted }: AuthFormProps) {
 
   return (
     <div className="w-full lg:w-1/2 order-1 lg:order-2">
-      <div className={cn("glass-card border border-white/10 rounded-[32px] p-6 sm:p-8 md:p-10 w-full max-w-[540px] shadow-2xl mx-auto transition-all duration-1000 delay-300 transform relative overflow-hidden", mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12")}>
-        <div className="absolute top-0 inset-x-0 h-px w-full bg-gradient-to-r from-transparent via-primary-light to-transparent opacity-50"></div>
+      <div
+        className={cn(
+          "glass-card border border-white/10 rounded-4xl p-6 sm:p-8 md:p-10 w-full max-w-135 shadow-2xl mx-auto transition-all duration-1000 delay-300 transform relative overflow-hidden",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12",
+        )}
+      >
+        <div className="absolute top-0 inset-x-0 h-px w-full bg-linear-to-r from-transparent via-primary-light to-transparent opacity-50"></div>
 
         {/* Mode Toggle Tabs */}
         <div className="flex p-1 bg-black/40 rounded-2xl mb-8">
@@ -175,7 +206,7 @@ export function AuthForm({ mounted }: AuthFormProps) {
               "flex-1 py-3 px-4 text-sm font-medium rounded-xl transition-all duration-300 cursor-pointer",
               isLoginMode
                 ? "bg-white/10 text-white shadow-sm border border-white/5"
-                : "text-white/40 hover:text-white/80"
+                : "text-white/40 hover:text-white/80",
             )}
           >
             Masuk Akun
@@ -186,7 +217,7 @@ export function AuthForm({ mounted }: AuthFormProps) {
               "flex-1 py-3 px-4 text-sm font-medium rounded-xl transition-all duration-300 cursor-pointer",
               !isLoginMode
                 ? "bg-white/10 text-white shadow-sm border border-white/5"
-                : "text-white/40 hover:text-white/80"
+                : "text-white/40 hover:text-white/80",
             )}
           >
             Daftar Baru
@@ -216,13 +247,20 @@ export function AuthForm({ mounted }: AuthFormProps) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-5"
+          noValidate
+        >
           {/* Field Khusus mode Daftar */}
           {!isLoginMode && (
             <>
               {/* NIM Di Atas */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
-                <label htmlFor="nim" className="block text-sm font-medium text-white/90">
+                <label
+                  htmlFor="nim"
+                  className="block text-sm font-medium text-white/90"
+                >
                   NIM <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
@@ -230,148 +268,231 @@ export function AuthForm({ mounted }: AuthFormProps) {
                     type="text"
                     id="nim"
                     value={nim}
-                    onChange={e => {
+                    onChange={(e) => {
                       setNim(e.target.value);
-                      if (errors.nim) setErrors(p => ({ ...p, nim: undefined }));
+                      if (errors.nim)
+                        setErrors((p) => ({ ...p, nim: undefined }));
                     }}
-                    className={cn("form-input w-full", errors.nim && "form-input-error")}
+                    className={cn(
+                      "form-input w-full",
+                      errors.nim && "form-input-error",
+                    )}
                     placeholder="Contoh: 2023010001"
                   />
                   {nim.length >= 10 && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center pr-1">
-                      {isValidating ? <IconLoader2 className="animate-spin text-white/50" size={18} /> :
-                        nimValidity === 'valid' ? <IconCheck className="text-green-400" size={18} /> :
-                          nimValidity === 'invalid' ? <IconX className="text-red-400" size={18} /> : null}
+                      {isValidating ? (
+                        <IconLoader2
+                          className="animate-spin text-white/50"
+                          size={18}
+                        />
+                      ) : nimValidity === "valid" ? (
+                        <IconCircleCheck className="text-green-400" size={18} />
+                      ) : nimValidity === "invalid" ? (
+                        <IconXboxX className="text-red-400" size={18} />
+                      ) : null}
                     </div>
                   )}
                 </div>
-                {errors.nim && <p className="text-xs text-red-400">{errors.nim}</p>}
-                {nimValidity === 'invalid' && !isValidating && nim.length >= 10 && (
-                  <p className="text-xs text-red-400">NIM tidak terdaftar sebagai mahasiswa UNIRA</p>
+                {errors.nim && (
+                  <p className="text-xs text-red-400">{errors.nim}</p>
                 )}
+                {nimValidity === "invalid" &&
+                  !isValidating &&
+                  nim.length >= 10 && (
+                    <p className="text-xs text-red-400">
+                      NIM tidak terdaftar sebagai mahasiswa UNIRA
+                    </p>
+                  )}
               </div>
 
               {/* Nama Lengkap (Manual, divalidasi dengan Zod) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
-                <label htmlFor="nama" className="block text-sm font-medium text-white/90">
-                  Nama Lengkap <span className="text-white/50 text-xs ml-1">(Sesuai SIAKAD)</span>
+                <label
+                  htmlFor="nama"
+                  className="block text-sm font-medium text-white/90"
+                >
+                  Nama Lengkap{" "}
+                  <span className="text-white/50 text-xs ml-1">
+                    (Sesuai SIMAT)
+                  </span>
                 </label>
                 <input
                   type="text"
                   id="nama"
                   value={nama}
-                  onChange={e => {
+                  onChange={(e) => {
                     setNama(e.target.value);
-                    if (errors.nama) setErrors(p => ({ ...p, nama: undefined }));
+                    if (errors.nama)
+                      setErrors((p) => ({ ...p, nama: undefined }));
                   }}
-                  className={cn("form-input w-full", errors.nama && "form-input-error")}
-                  placeholder="Ketik nama sesuai dengan data mahasiswa UNIRA"
+                  className={cn(
+                    "form-input w-full",
+                    errors.nama && "form-input-error",
+                  )}
+                  placeholder="Ketik nama sesuai dengan data yang terdaftar di UNIRA"
                 />
-                {errors.nama && <p className="text-xs text-red-400">{errors.nama}</p>}
+                {errors.nama && (
+                  <p className="text-xs text-red-400">{errors.nama}</p>
+                )}
               </div>
 
               {/* Angkatan (Auto-fill) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
-                <label htmlFor="angkatan" className="block text-sm font-medium text-white/90">
-                  Tahun Angkatan <span className="text-white/50 text-xs ml-1">(Otomatis)</span>
+                <label
+                  htmlFor="angkatan"
+                  className="block text-sm font-medium text-white/90"
+                >
+                  Tahun Angkatan{" "}
+                  <span className="text-white/50 text-xs ml-1">(Otomatis)</span>
                 </label>
                 <input
                   type="text"
                   id="angkatan"
                   value={angkatan}
                   readOnly
-                  className={cn("form-input w-full bg-black/30 text-white/70 cursor-not-allowed", errors.angkatan && "form-input-error")}
+                  className={cn(
+                    "form-input w-full bg-black/30 text-white/70 cursor-not-allowed",
+                    errors.angkatan && "form-input-error",
+                  )}
                   placeholder="Terisi otomatis dari NIM"
                 />
-                {errors.angkatan && <p className="text-xs text-red-400">{errors.angkatan}</p>}
+                {errors.angkatan && (
+                  <p className="text-xs text-red-400">{errors.angkatan}</p>
+                )}
               </div>
 
               {/* Prodi (Dropdown API) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
-                <label htmlFor="prodi" className="block text-sm font-medium text-white/90">
+                <label
+                  htmlFor="prodi"
+                  className="block text-sm font-medium text-white/90"
+                >
                   Program Studi <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <select
                     id="prodi"
                     value={prodi}
-                    onChange={e => {
+                    onChange={(e) => {
                       setProdi(e.target.value);
-                      if (errors.prodi) setErrors(p => ({ ...p, prodi: undefined }));
+                      if (errors.prodi)
+                        setErrors((p) => ({ ...p, prodi: undefined }));
                     }}
-                    className={cn("form-input w-full appearance-none", errors.prodi && "form-input-error", !prodi && "text-white/40")}
+                    className={cn(
+                      "form-input w-full appearance-none",
+                      errors.prodi && "form-input-error",
+                      !prodi && "text-white/40",
+                    )}
                     disabled={loadingProdi}
                   >
-                    <option value="" disabled>{loadingProdi ? "Memuat prodi dari sistem..." : "Pilih Program Studi"}</option>
-                    {prodiList.map(p => (
-                      <option key={p.id} value={p.nama} className="bg-[#1a1a2e] text-white py-2">
+                    <option value="" disabled>
+                      {loadingProdi
+                        ? "Memuat prodi dari sistem..."
+                        : "Pilih Program Studi"}
+                    </option>
+                    {prodiList.map((p) => (
+                      <option
+                        key={p.id}
+                        value={p.nama}
+                        className="bg-[#1a1a2e] text-white py-2"
+                      >
                         {p.nama}
                       </option>
                     ))}
                   </select>
-                  <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" size={20} />
+                  <IconChevronDown
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"
+                    size={20}
+                  />
                 </div>
-                {errors.prodi && <p className="text-xs text-red-400">{errors.prodi}</p>}
+                {errors.prodi && (
+                  <p className="text-xs text-red-400">{errors.prodi}</p>
+                )}
               </div>
             </>
           )}
 
           {/* Email (Kedua Mode) */}
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-white/90">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-white/90"
+            >
               Alamat Email <span className="text-red-400">*</span>
             </label>
             <input
               type="email"
               id="email"
               value={email}
-              onChange={e => {
+              onChange={(e) => {
                 setEmail(e.target.value);
-                if (errors.email) setErrors(p => ({ ...p, email: undefined }));
+                if (errors.email)
+                  setErrors((p) => ({ ...p, email: undefined }));
               }}
               className={cn("form-input", errors.email && "form-input-error")}
               placeholder="nama@gmail.com"
             />
-            {errors.email && <p className="text-xs text-red-400">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-xs text-red-400">{errors.email}</p>
+            )}
           </div>
 
           {/* Password (Kedua Mode) */}
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-white/90">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-white/90"
+            >
               Kata Sandi <span className="text-red-400">*</span>
             </label>
             <input
               type="password"
               id="password"
               value={password}
-              onChange={e => {
+              onChange={(e) => {
                 setPassword(e.target.value);
-                if (errors.password) setErrors(p => ({ ...p, password: undefined }));
+                if (errors.password)
+                  setErrors((p) => ({ ...p, password: undefined }));
               }}
-              className={cn("form-input", errors.password && "form-input-error")}
+              className={cn(
+                "form-input",
+                errors.password && "form-input-error",
+              )}
               placeholder="••••••••"
             />
-            {errors.password && <p className="text-xs text-red-400">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-xs text-red-400">{errors.password}</p>
+            )}
           </div>
 
           {/* Confirm Password (Hanya Mode Daftar) */}
           {!isLoginMode && (
             <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white/90">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-white/90"
+              >
                 Konfirmasi Kata Sandi <span className="text-red-400">*</span>
               </label>
               <input
                 type="password"
                 id="confirmPassword"
                 value={confirmPassword}
-                onChange={e => {
+                onChange={(e) => {
                   setConfirmPassword(e.target.value);
-                  if (errors.confirmPassword) setErrors(p => ({ ...p, confirmPassword: undefined }));
+                  if (errors.confirmPassword)
+                    setErrors((p) => ({ ...p, confirmPassword: undefined }));
                 }}
-                className={cn("form-input", errors.confirmPassword && "form-input-error")}
+                className={cn(
+                  "form-input",
+                  errors.confirmPassword && "form-input-error",
+                )}
                 placeholder="••••••••"
               />
-              {errors.confirmPassword && <p className="text-xs text-red-400">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && (
+                <p className="text-xs text-red-400">{errors.confirmPassword}</p>
+              )}
             </div>
           )}
 
@@ -379,7 +500,7 @@ export function AuthForm({ mounted }: AuthFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="mt-6 relative overflow-hidden group w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary-base to-[#ec4899] text-white font-medium hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+            className="mt-6 relative overflow-hidden group w-full py-4 px-6 rounded-xl bg-linear-to-r from-primary-base to-[#ec4899] text-white font-medium hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             <span className="relative z-10 flex items-center justify-center gap-2">

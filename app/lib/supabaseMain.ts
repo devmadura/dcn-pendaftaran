@@ -1,10 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const mainSupabaseUrl = process.env.MAIN_SUPABASE_URL || '';
-const mainSupabaseKey = process.env.MAIN_SUPABASE_SERVICE_ROLE_KEY || '';
+let _supabaseMainAdmin: ReturnType<typeof createClient> | null = null;
 
-if (!mainSupabaseUrl || !mainSupabaseKey) {
-  console.warn("MAIN_SUPABASE_URL or MAIN_SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.");
+export function getSupabaseMainAdmin() {
+  if (_supabaseMainAdmin) return _supabaseMainAdmin;
+
+  const url = process.env.MAIN_SUPABASE_URL;
+  const key = process.env.MAIN_SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    throw new Error('MAIN_SUPABASE_URL or MAIN_SUPABASE_SERVICE_ROLE_KEY is missing');
+  }
+
+  _supabaseMainAdmin = createClient(url, key);
+  return _supabaseMainAdmin;
 }
-
-export const supabaseMainAdmin = createClient(mainSupabaseUrl, mainSupabaseKey);

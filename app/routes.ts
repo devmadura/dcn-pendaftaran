@@ -5,5 +5,6 @@ export default [
   route("dashboard", "routes/dashboard.tsx"),
   route("api/mahasiswa", "routes/api.mahasiswa.ts"),
   route("api/prodi", "routes/api.prodi.ts"),
-  route("api/check-member", "routes/api.check-member.ts")
+  route("api/check-member", "routes/api.check-member.ts"),
+  route("api/image", "routes/api.image.ts"),
 ] satisfies RouteConfig;
