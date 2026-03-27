@@ -16,7 +16,7 @@ export function Hero({ mounted }: HeroProps) {
 
         <h1 className="text-5xl md:text-6xl lg:text-[4rem] font-display font-bold leading-[1.1] mb-6">
           Portal Kontributor <br />
-          <em className="text-gradient-hero not-italic">DCN UNIRA</em>
+          <em className="bg-linear-to-r from-blue-400 to-white bg-clip-text text-transparent text-shadow-2xs not-italic">DCN UNIRA</em>
         </h1>
 
         <p className="text-lg text-white/70 max-w-lg mb-12 font-light leading-relaxed">

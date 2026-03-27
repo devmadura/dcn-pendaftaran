@@ -9,6 +9,66 @@ import { ProfileCard } from "../components/dashboard/ProfileCard";
 import { StatusCard } from "../components/dashboard/StatusCard";
 import { BiodataForm } from "../components/dashboard/BiodataForm";
 import { AdminPanel } from "../components/dashboard/AdminPanel";
+import { supabaseMainAdmin } from "../lib/supabaseMain";
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+
+  if (intent === 'sync') {
+    let synced = 0;
+    let skipped = 0;
+
+    const { data: activeAccounts, error: fetchError } = await supabase
+      .from('accounts')
+      .select('*')
+      .eq('status', 'active');
+
+    if (fetchError || !activeAccounts) {
+      return { syncResult: { synced: 0, skipped: 0, message: "Gagal mengambil data akun aktif dari portal" } };
+    }
+
+    for (const account of activeAccounts) {
+      if (!account.nim) continue;
+
+      const { data: existing, error: checkError } = await supabaseMainAdmin
+        .from('kontributor')
+        .select('id')
+        .eq('nim', account.nim)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error("Error checking main DB:", checkError);
+        continue;
+      }
+
+      if (existing) {
+        skipped++;
+      } else {
+        const { error: insertError } = await supabaseMainAdmin
+          .from('kontributor')
+          .insert({
+            nim: account.nim,
+            email: account.email,
+            nama: account.nama,
+            angkatan: account.angkatan,
+            prodi: account.prodi,
+            total_poin: 0
+          });
+
+        if (insertError) {
+          console.error("Error inserting to main DB:", insertError);
+        } else {
+          synced++;
+        }
+      }
+    }
+
+    return { syncResult: { synced, skipped, message: `Sinkronisasi selesai: ${synced} ditambahkan, ${skipped} dilewati.` } };
+  }
+
+  return null;
+}
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -113,7 +173,7 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/dcn-unira.png" alt="DCN" className="w-[32px] h-[32px] object-contain" />
-            <span className="font-display font-semibold hidden sm:block">Dashboard Calon Kontributor</span>
+            <span className="font-display font-semibold hidden sm:block">Dashboard Portal Kontributor DCN</span>
           </div>
           <button
             onClick={handleLogout}

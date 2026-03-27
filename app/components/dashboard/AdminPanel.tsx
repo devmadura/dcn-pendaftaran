@@ -1,4 +1,5 @@
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck, IconX, IconDatabaseExport } from "@tabler/icons-react";
+import { Form, useActionData, useNavigation } from "react-router";
 
 interface AdminPanelProps {
   pendingUsers: any[];
@@ -6,13 +7,35 @@ interface AdminPanelProps {
 }
 
 export function AdminPanel({ pendingUsers, onReviewUser }: AdminPanelProps) {
+  const actionData = useActionData<any>();
+  const navigation = useNavigation();
+  const isSyncing = navigation.state === "submitting" && navigation.formData?.get("intent") === "sync";
+
   return (
     <div className="w-full">
       <div className="p-6 sm:p-10 glass-card border border-purple-500/30 rounded-[24px]">
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-display font-semibold text-white/90">Dashboard Admin</h1>
             <p className="text-white/50 text-sm md:text-base mt-1">Kelola verifikasi pendaftar baru Dicoding Community Network</p>
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-2 mt-4 md:mt-0">
+            <Form method="post">
+              <input type="hidden" name="intent" value="sync" />
+              <button 
+                type="submit" 
+                disabled={isSyncing}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg text-sm font-medium transition-colors border border-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <IconDatabaseExport size={18} />
+                {isSyncing ? "Menyinkronkan..." : "Sync ke DB Utama"}
+              </button>
+            </Form>
+            {actionData?.syncResult?.message && (
+              <p className="text-xs text-blue-300 font-medium whitespace-nowrap">
+                {actionData.syncResult.message}
+              </p>
+            )}
           </div>
         </div>
 

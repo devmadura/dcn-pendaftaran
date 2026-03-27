@@ -19,6 +19,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
 
     return Response.json({
+      success: true,
       total: opsiProdi.length,
       data: opsiProdi
     });

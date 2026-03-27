@@ -1,9 +1,11 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { IconLoader2, IconCheck, IconX, IconChevronDown } from "@tabler/icons-react";
+import { z } from "zod";
 import { cn } from "../../lib/utils";
 import { supabase } from "../../lib/supabase";
 import { useNimValidation } from "../../hooks/useNimValidation";
 import { useProdiData } from "../../hooks/useProdiData";
+import { loginSchema, createRegisterSchema } from "../../lib/validations";
 interface AuthFormProps {
   mounted: boolean;
 }
@@ -28,25 +30,14 @@ export function AuthForm({ mounted }: AuthFormProps) {
 
   useEffect(() => {
     if (!isLoginMode && nimValidity === 'valid') {
-      if (studentName) setNama(studentName);
       if (nim.length >= 4) setAngkatan(nim.substring(0, 4));
-
-      setErrors(p => ({ ...p, nama: undefined, angkatan: undefined }));
+      setErrors(p => ({ ...p, angkatan: undefined }));
     } else if (!isLoginMode && nimValidity === 'invalid') {
-      setNama("");
       setAngkatan("");
     }
-  }, [nimValidity, studentName, nim, isLoginMode]);
+  }, [nimValidity, nim, isLoginMode]);
 
-  const [errors, setErrors] = useState<{
-    nama?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    nim?: string;
-    angkatan?: string;
-    prodi?: string;
-  }>({});
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   useEffect(() => {
     setErrors({});
@@ -62,77 +53,32 @@ export function AuthForm({ mounted }: AuthFormProps) {
     }
   }, []);
 
-  const validateNama = (val: string) => {
-    if (isLoginMode) return null;
-    if (!val.trim()) return 'Nama lengkap wajib diisi';
-    if (val.trim().length < 2) return 'Nama terlalu pendek';
-    return null;
-  };
-
-  const validateNim = (val: string) => {
-    if (isLoginMode) return null;
-    if (!val.trim()) return 'NIM wajib diisi';
-    return null;
-  };
-
-  const validateAngkatan = (val: string) => {
-    if (isLoginMode) return null;
-    if (!val.trim()) return 'Angkatan wajib diisi';
-    return null;
-  };
-
-  const validateProdi = (val: string) => {
-    if (isLoginMode) return null;
-    if (!val.trim()) return 'Program Studi wajib diisi';
-    return null;
-  };
-
-  const validateEmail = (val: string) => {
-    if (!val.trim()) return 'Email wajib diisi';
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(val.trim())) return 'Format email tidak valid';
-    return null;
-  };
-
-  const validatePassword = (val: string) => {
-    if (!val) return 'Kata sandi wajib diisi';
-    if (!isLoginMode && val.length < 6) return 'Minimal 6 karakter';
-    return null;
-  };
-
-  const validateConfirmPassword = (val: string) => {
-    if (isLoginMode) return null;
-    if (!val) return 'Konfirmasi wajib diisi';
-    if (val !== password) return 'Kata sandi tidak cocok';
-    return null;
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setServerError("");
     setSuccessMsg("");
 
-    const namaErr = validateNama(nama);
-    const emailErr = validateEmail(email);
-    const passErr = validatePassword(password);
-    const confirmErr = validateConfirmPassword(confirmPassword);
-    const nimErr = validateNim(nim);
-    const angkatanErr = validateAngkatan(angkatan);
-    const prodiErr = validateProdi(prodi);
-
-    const isNimApiInvalid = !isLoginMode && nimValidity === 'invalid';
-
-    setErrors({
-      nama: namaErr || undefined,
-      email: emailErr || undefined,
-      password: passErr || undefined,
-      confirmPassword: confirmErr || undefined,
-      nim: nimErr || (isNimApiInvalid ? 'NIM tidak terdaftar di sistem UNIRA' : undefined),
-      angkatan: angkatanErr || undefined,
-      prodi: prodiErr || undefined,
-    });
-
-    if (namaErr || emailErr || passErr || confirmErr || nimErr || isNimApiInvalid || angkatanErr || prodiErr) {
+    try {
+      if (isLoginMode) {
+        loginSchema.parse({ email, password });
+      } else {
+        const registerSchema = createRegisterSchema(nimValidity, studentName);
+        registerSchema.parse({
+          nim, nama, angkatan, prodi, email, password, confirmPassword
+        });
+      }
+      setErrors({});
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.issues.forEach((issue: z.ZodIssue) => {
+          const path = issue.path[0] as string;
+          if (!fieldErrors[path]) {
+            fieldErrors[path] = issue.message;
+          }
+        });
+        setErrors(fieldErrors);
+      }
       return;
     }
 
@@ -165,20 +111,34 @@ export function AuthForm({ mounted }: AuthFormProps) {
       }
 
       if (authData.user) {
+        let finalStatus = 'pending';
+        let messageForm = 'Pendaftaran berhasil! Tunggu persetujuan admin sebelum bisa login.';
+        try {
+          const urlStr = `/api/check-member?nim=${encodeURIComponent(nim)}&email=${encodeURIComponent(email)}`;
+          const checkRes = await fetch(urlStr);
+          const checkData = await checkRes.json();
+          if (checkData.active) {
+            finalStatus = 'active';
+            messageForm = 'Pendaftaran berhasil, silahkan login.';
+          }
+        } catch (e) {
+          console.error("Gagal verifikasi status member dari DB utama:", e);
+        }
+
         const { error: insertError } = await supabase.from('accounts').insert({
           user_id: authData.user.id,
           nim,
           email,
           nama,
           angkatan,
-          prodi,
-          status: 'pending'
+          prodi: prodi.toLowerCase(),
+          status: finalStatus
         });
 
         if (insertError) {
           setServerError("Gagal menyimpan data profil.");
         } else {
-          setSuccessMsg("Pendaftaran berhasil! Tunggu persetujuan admin sebelum bisa login.");
+          setSuccessMsg(messageForm);
           setNama("");
           setEmail("");
           setPassword("");
@@ -270,8 +230,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
                     type="text"
                     id="nim"
                     value={nim}
-                    onChange={e => setNim(e.target.value)}
-                    onBlur={() => setErrors(p => ({ ...p, nim: validateNim(nim) || undefined }))}
+                    onChange={e => {
+                      setNim(e.target.value);
+                      if (errors.nim) setErrors(p => ({ ...p, nim: undefined }));
+                    }}
                     className={cn("form-input w-full", errors.nim && "form-input-error")}
                     placeholder="Contoh: 2023010001"
                   />
@@ -289,18 +251,21 @@ export function AuthForm({ mounted }: AuthFormProps) {
                 )}
               </div>
 
-              {/* Nama (Auto-fill) */}
+              {/* Nama Lengkap (Manual, divalidasi dengan Zod) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
                 <label htmlFor="nama" className="block text-sm font-medium text-white/90">
-                  Nama Lengkap <span className="text-white/50 text-xs ml-1">(Otomatis)</span>
+                  Nama Lengkap <span className="text-white/50 text-xs ml-1">(Sesuai SIAKAD)</span>
                 </label>
                 <input
                   type="text"
                   id="nama"
                   value={nama}
-                  readOnly
-                  className={cn("form-input w-full bg-black/30 text-white/70 cursor-not-allowed", errors.nama && "form-input-error")}
-                  placeholder="Terisi otomatis dari NIM"
+                  onChange={e => {
+                    setNama(e.target.value);
+                    if (errors.nama) setErrors(p => ({ ...p, nama: undefined }));
+                  }}
+                  className={cn("form-input w-full", errors.nama && "form-input-error")}
+                  placeholder="Ketik nama sesuai dengan data mahasiswa UNIRA"
                 />
                 {errors.nama && <p className="text-xs text-red-400">{errors.nama}</p>}
               </div>
@@ -330,8 +295,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
                   <select
                     id="prodi"
                     value={prodi}
-                    onChange={e => setProdi(e.target.value)}
-                    onBlur={() => setErrors(p => ({ ...p, prodi: validateProdi(prodi) || undefined }))}
+                    onChange={e => {
+                      setProdi(e.target.value);
+                      if (errors.prodi) setErrors(p => ({ ...p, prodi: undefined }));
+                    }}
                     className={cn("form-input w-full appearance-none", errors.prodi && "form-input-error", !prodi && "text-white/40")}
                     disabled={loadingProdi}
                   >
@@ -358,8 +325,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
               type="email"
               id="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              onBlur={() => setErrors(p => ({ ...p, email: validateEmail(email) || undefined }))}
+              onChange={e => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors(p => ({ ...p, email: undefined }));
+              }}
               className={cn("form-input", errors.email && "form-input-error")}
               placeholder="nama@gmail.com"
             />
@@ -375,8 +344,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
               type="password"
               id="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              onBlur={() => setErrors(p => ({ ...p, password: validatePassword(password) || undefined }))}
+              onChange={e => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors(p => ({ ...p, password: undefined }));
+              }}
               className={cn("form-input", errors.password && "form-input-error")}
               placeholder="••••••••"
             />
@@ -393,8 +364,10 @@ export function AuthForm({ mounted }: AuthFormProps) {
                 type="password"
                 id="confirmPassword"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                onBlur={() => setErrors(p => ({ ...p, confirmPassword: validateConfirmPassword(confirmPassword) || undefined }))}
+                onChange={e => {
+                  setConfirmPassword(e.target.value);
+                  if (errors.confirmPassword) setErrors(p => ({ ...p, confirmPassword: undefined }));
+                }}
                 className={cn("form-input", errors.confirmPassword && "form-input-error")}
                 placeholder="••••••••"
               />
@@ -406,7 +379,7 @@ export function AuthForm({ mounted }: AuthFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="mt-6 relative overflow-hidden group w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary-base to-[#ec4899] text-white font-medium hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="mt-6 relative overflow-hidden group w-full py-4 px-6 rounded-xl bg-gradient-to-r from-primary-base to-[#ec4899] text-white font-medium hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             <span className="relative z-10 flex items-center justify-center gap-2">
@@ -429,7 +402,7 @@ export function AuthForm({ mounted }: AuthFormProps) {
             className="text-sm text-white/50 hover:text-white transition-colors"
           >
             {isLoginMode
-              ? "Belum punya akun? Buat pendaftaran simulasi di sini."
+              ? "Belum punya akun? Buat pendaftaran di sini."
               : "Sudah punya akun? Masuk menggunakan email sekarang."}
           </button>
         </div>
