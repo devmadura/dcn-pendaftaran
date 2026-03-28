@@ -154,7 +154,7 @@ export function AuthForm({ mounted, loginError }: AuthFormProps) {
           user_id: authData.user.id,
           nim,
           email,
-          nama,
+          nama: nama.toLowerCase(),
           angkatan,
           prodi: prodi.toLowerCase(),
           status: finalStatus,

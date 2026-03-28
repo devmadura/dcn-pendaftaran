@@ -1,9 +1,4 @@
-import {
-  Link,
-  Navigate,
-  useLoaderData,
-  type LoaderFunctionArgs,
-} from "react-router";
+import { Link, useLoaderData, type LoaderFunctionArgs } from "react-router";
 import { useRef } from "react";
 import * as htmlToImage from "html-to-image";
 import { requireActiveUser } from "../lib/Requireactiveuser";
@@ -11,13 +6,17 @@ import { requireActiveUser } from "../lib/Requireactiveuser";
 interface Mahasiswa {
   nim: string;
   nama: string;
-  prodi: string;
   image: string;
 }
 
+type Angkatan = {
+  angkatan: string;
+  prodi: string;
+};
+
 interface LoaderData {
   mahasiswa: Mahasiswa;
-  angkatan: string;
+  angkatan: Angkatan;
 }
 
 const baseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:5173";
@@ -43,7 +42,7 @@ export async function loader({
 
   return {
     mahasiswa: mhsResponse.data,
-    angkatan: (profile.angkatan as string) ?? "-",
+    angkatan: profile,
   };
 }
 
@@ -200,7 +199,7 @@ export default function GenerateIdCard() {
                 color: "#fff",
               }}
             >
-              KM
+              DCN
             </div>
             <span
               style={{
@@ -210,7 +209,7 @@ export default function GenerateIdCard() {
                 letterSpacing: "0.4px",
               }}
             >
-              Komunitas Mahasiswa
+              Dicoding Community Network UNIRA
             </span>
           </div>
           <span
@@ -221,7 +220,7 @@ export default function GenerateIdCard() {
               textTransform: "uppercase",
             }}
           >
-            Kartu Anggota
+            Kartu Kontributor
           </span>
         </div>
 
@@ -318,12 +317,12 @@ export default function GenerateIdCard() {
               }}
             >
               <Field label="NIM" value={mahasiswa.nim} mono />
-              <Field label="Angkatan" value={angkatan} />
+              <Field label="Angkatan" value={angkatan.angkatan} />
               <Field
                 label="Program Studi"
-                value={mahasiswa.prodi ?? "Teknik Informatika"}
+                value={angkatan.prodi ?? "Teknik Informatika"}
               />
-              <Field label="Berlaku" value="s/d Lulus" />
+              <Field label="Berlaku" value="selama menjadi kontributor" />
             </div>
           </div>
         </div>
