@@ -2,14 +2,17 @@ import type { Route } from "./+types/dashboard";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { IconLogout } from "@tabler/icons-react";
-import { supabase } from "../lib/supabase";
-import { ProtectedRoute } from "../components/ProtectedRoute";
-
 import { ProfileCard } from "../components/dashboard/ProfileCard";
 import { StatusCard } from "../components/dashboard/StatusCard";
 import { BiodataForm } from "../components/dashboard/BiodataForm";
 import { AdminPanel } from "../components/dashboard/AdminPanel";
-import { getSupabaseMainAdmin } from "../lib/supabaseMain";
+import { getSupabaseMainAdmin, supabase } from "../lib/supabase/supabase";
+import { requireActiveUser } from "~/lib/Requireactiveuser";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  await requireActiveUser(request);
+  return null;
+}
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
@@ -199,7 +202,7 @@ export default function Dashboard() {
   if (!mounted) return null;
 
   return (
-    <ProtectedRoute>
+    <>
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-8 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -247,6 +250,6 @@ export default function Dashboard() {
           </div>
         )}
       </main>
-    </ProtectedRoute>
+    </>
   );
 }

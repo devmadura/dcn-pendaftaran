@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase/supabase";
 import { IconLoader2 } from "@tabler/icons-react";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -11,28 +11,31 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     let mounted = true;
 
     async function checkAuth() {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         if (mounted) navigate("/");
         return;
       }
 
       const { data: profile } = await supabase
-        .from('accounts')
-        .select('status')
-        .eq('user_id', session.user.id)
+        .from("accounts")
+        .select("status")
+        .eq("user_id", session.user.id)
         .single();
-      
-      if (!profile || profile.status !== 'active') {
-        const errorMsg = profile?.status === 'pending'
-          ? "Akun kamu belum disetujui admin"
-          : profile?.status === 'rejected'
-          ? "Pendaftaran kamu ditolak, hubungi admin"
-          : "Akun tidak aktif";
+
+      if (!profile || profile.status !== "active") {
+        const errorMsg =
+          profile?.status === "pending"
+            ? "Akun kamu belum disetujui admin"
+            : profile?.status === "rejected"
+              ? "Pendaftaran kamu ditolak, hubungi admin"
+              : "Akun tidak aktif";
 
         await supabase.auth.signOut();
-        sessionStorage.setItem('login_error', errorMsg);
+        sessionStorage.setItem("login_error", errorMsg);
         if (mounted) navigate("/");
         return;
       }

@@ -2,6 +2,7 @@ import type { Route } from "./+types/home";
 import { useState, useEffect } from "react";
 import { Hero } from "../components/home/Hero";
 import { AuthForm } from "../components/auth/AuthForm";
+import { useLoaderData } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -14,7 +15,13 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+export async function loader({ request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  return { loginError: url.searchParams.get("error") };
+}
+
 export default function Home() {
+  const { loginError } = useLoaderData<typeof loader>();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,7 +56,7 @@ export default function Home() {
       <main className="min-h-screen pt-24 pb-12 px-4 md:px-8 w-full max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start lg:items-center min-h-[calc(100vh-140px)]">
           <Hero mounted={mounted} />
-          <AuthForm mounted={mounted} />
+          <AuthForm mounted={mounted} loginError={loginError} />
         </div>
       </main>
     </>

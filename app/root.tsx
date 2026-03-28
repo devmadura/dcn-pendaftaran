@@ -5,10 +5,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useNavigate
+  useNavigate,
 } from "react-router";
-import { useEffect } from "react";
-import { supabase } from "./lib/supabase";
+import { useEffect, useRef } from "react";
+import { supabase } from "./lib/supabase/supabase";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -41,11 +41,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="background-gradient"></div>
           {/* Particles */}
           <div className="background-particles">
-            <div className="absolute w-[2px] h-[2px] bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_0s] left-[10%] top-[20%]" />
-            <div className="absolute w-[2px] h-[2px] bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_2s] left-[30%] top-[60%]" />
-            <div className="absolute w-[2px] h-[2px] bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_4s] left-[50%] top-[40%]" />
-            <div className="absolute w-[2px] h-[2px] bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_6s] left-[70%] top-[70%]" />
-            <div className="absolute w-[2px] h-[2px] bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_8s] left-[90%] top-[30%]" />
+            <div className="absolute w-0.5 h-0.5 bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_0s] left-[10%] top-[20%]" />
+            <div className="absolute w-0.5 h-0.5 bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_2s] left-[30%] top-[60%]" />
+            <div className="absolute w-0.5 h-0.5 bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_4s] left-[50%] top-[40%]" />
+            <div className="absolute w-0.5 h-0.5 bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_6s] left-[70%] top-[70%]" />
+            <div className="absolute w-0.5 h-0.5 bg-white/30 rounded-full animate-[float-particle_15s_infinite_ease-in-out_8s] left-[90%] top-[30%]" />
           </div>
         </div>
 
@@ -60,37 +60,62 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const navigate = useNavigate();
 
+  const navigateRef = useRef(navigate);
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        navigate("/");
-      } else if (event === 'SIGNED_IN' && session) {
-        const { data: profile } = await supabase
-          .from('accounts')
-          .select('status')
-          .eq('user_id', session.user.id)
-          .single();
+    navigateRef.current = navigate;
+  }, [navigate]);
 
-        if (profile?.status !== 'active') {
-          const errorMsg = profile?.status === 'pending'
-            ? "Akun kamu belum disetujui admin"
-            : profile?.status === 'rejected'
-            ? "Pendaftaran kamu ditolak, hubungi admin"
-            : "Akun tidak aktif";
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // 1. Sync session ke cookie dulu di semua event yang ada session
+      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session) {
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session }),
+        });
+      }
+
+      // 2. Handle logout
+      if (event === "SIGNED_OUT") {
+        await fetch("/api/auth/session", { method: "DELETE" });
+        navigateRef.current("/");
+        return;
+      }
+
+      // 3. Handle login — cek status akun
+      if (event === "SIGNED_IN" && session) {
+        const { data: profile } = await supabase
+          .from("accounts")
+          .select("status")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (!profile) return;
+
+        if (profile?.status !== "active") {
+          const errorMsg =
+            profile?.status === "pending"
+              ? "Akun kamu belum disetujui admin"
+              : profile?.status === "rejected"
+                ? "Pendaftaran kamu ditolak, hubungi admin"
+                : "Akun tidak aktif";
 
           await supabase.auth.signOut();
-          sessionStorage.setItem('login_error', errorMsg);
-          navigate("/");
-        } else {
-          if (window.location.pathname === "/") {
-            navigate("/dashboard");
-          }
+          navigateRef.current(`/?error=${encodeURIComponent(errorMsg)}`);
+          return;
+        }
+
+        if (window.location.pathname === "/") {
+          navigateRef.current("/dashboard");
         }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   return <Outlet />;
 }
@@ -114,9 +139,14 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="glass-card p-8 rounded-3xl max-w-lg w-full text-center">
-        <h1 className="text-4xl font-display font-bold text-red-400 mb-4">{message}</h1>
+        <h1 className="text-4xl font-display font-bold text-red-400 mb-4">
+          {message}
+        </h1>
         <p className="text-white/80 mb-6">{details}</p>
-        <a href="/" className="inline-block px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors">
+        <a
+          href="/"
+          className="inline-block px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+        >
           Kembali ke Beranda
         </a>
         {stack && (

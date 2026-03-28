@@ -7,15 +7,17 @@ import {
 } from "@tabler/icons-react";
 import { z } from "zod";
 import { cn } from "../../lib/utils";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../lib/supabase/supabase";
 import { useNimValidation } from "../../hooks/useNimValidation";
 import { useProdiData } from "../../hooks/useProdiData";
 import { loginSchema, createRegisterSchema } from "../../lib/validations";
+
 interface AuthFormProps {
   mounted: boolean;
+  loginError?: string | null;
 }
 
-export function AuthForm({ mounted }: AuthFormProps) {
+export function AuthForm({ mounted, loginError }: AuthFormProps) {
   const [isLoginMode, setIsLoginMode] = useState(true);
 
   const [nama, setNama] = useState("");
@@ -27,11 +29,20 @@ export function AuthForm({ mounted }: AuthFormProps) {
   const [prodi, setProdi] = useState("");
 
   const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState("");
+  const [serverError, setServerError] = useState(loginError ?? "");
   const [successMsg, setSuccessMsg] = useState("");
 
   const { isValidating, nimValidity, studentName } = useNimValidation(nim);
   const { prodiList, loading: loadingProdi } = useProdiData();
+
+  useEffect(() => {
+    if (loginError) {
+      setServerError(loginError);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [loginError]);
 
   useEffect(() => {
     if (!isLoginMode && nimValidity === "valid") {
@@ -49,14 +60,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
     setServerError("");
     setSuccessMsg("");
   }, [isLoginMode]);
-
-  useEffect(() => {
-    const loginError = sessionStorage.getItem("login_error");
-    if (loginError) {
-      setServerError(loginError);
-      sessionStorage.removeItem("login_error");
-    }
-  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -137,9 +140,11 @@ export function AuthForm({ mounted }: AuthFormProps) {
           const urlStr = `/api/check-member?nim=${encodeURIComponent(nim)}&email=${encodeURIComponent(email)}`;
           const checkRes = await fetch(urlStr);
           const checkData = await checkRes.json();
-          if (checkData.active) {
+
+          if (checkData.match) {
             finalStatus = "active";
-            messageForm = "Pendaftaran berhasil, silahkan login.";
+            messageForm =
+              "(anda terdeteksi old kontributor) Pendaftaran berhasil, silahkan login tanpa persetujuan.";
           }
         } catch (e) {
           console.error("Gagal verifikasi status member dari DB utama:", e);
@@ -236,14 +241,16 @@ export function AuthForm({ mounted }: AuthFormProps) {
         </div>
 
         {serverError && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-pulse">
-            {serverError}
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-start gap-3">
+            <IconXboxX size={18} className="shrink-0 mt-0.5" />
+            <span>{serverError}</span>
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm animate-pulse">
-            {successMsg}
+          <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-start gap-3">
+            <IconCircleCheck size={18} className="shrink-0 mt-0.5" />
+            <span>{successMsg}</span>
           </div>
         )}
 
@@ -252,10 +259,8 @@ export function AuthForm({ mounted }: AuthFormProps) {
           className="flex flex-col gap-5"
           noValidate
         >
-          {/* Field Khusus mode Daftar */}
           {!isLoginMode && (
             <>
-              {/* NIM Di Atas */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
                 <label
                   htmlFor="nim"
@@ -306,7 +311,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
                   )}
               </div>
 
-              {/* Nama Lengkap (Manual, divalidasi dengan Zod) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
                 <label
                   htmlFor="nama"
@@ -337,7 +341,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
                 )}
               </div>
 
-              {/* Angkatan (Auto-fill) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
                 <label
                   htmlFor="angkatan"
@@ -362,7 +365,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
                 )}
               </div>
 
-              {/* Prodi (Dropdown API) */}
               <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
                 <label
                   htmlFor="prodi"
@@ -413,7 +415,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
             </>
           )}
 
-          {/* Email (Kedua Mode) */}
           <div className="space-y-2">
             <label
               htmlFor="email"
@@ -438,7 +439,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
             )}
           </div>
 
-          {/* Password (Kedua Mode) */}
           <div className="space-y-2">
             <label
               htmlFor="password"
@@ -466,7 +466,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
             )}
           </div>
 
-          {/* Confirm Password (Hanya Mode Daftar) */}
           {!isLoginMode && (
             <div className="space-y-2 animate-[fadeIn_0.5s_ease-out]">
               <label
@@ -496,7 +495,6 @@ export function AuthForm({ mounted }: AuthFormProps) {
             </div>
           )}
 
-          {/* Submit button */}
           <button
             type="submit"
             disabled={loading}
