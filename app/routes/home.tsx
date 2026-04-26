@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { Hero } from "../components/home/Hero";
 import { AuthForm } from "../components/auth/AuthForm";
 import { useLoaderData } from "react-router";
+import { createSupabaseServerClient } from "../lib/supabase/supabase.server";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Portal Kontributor - DCN UNIRA" },
     {
@@ -17,11 +18,26 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
-  return { loginError: url.searchParams.get("error") };
+  const loginError = url.searchParams.get("error");
+
+  const { supabase } = createSupabaseServerClient(request);
+  const { data: recentAccounts } = await supabase
+    .from("accounts")
+    .select("nama")
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const recentRegistrants = (recentAccounts || []).map((acc) => {
+    const nama = acc.nama || "Hamba Allah";
+    if (nama.length <= 8) return nama + "*****";
+    return nama.substring(0, 8) + "*****";
+  });
+
+  return { loginError, recentRegistrants };
 }
 
 export default function Home() {
-  const { loginError } = useLoaderData<typeof loader>();
+  const { loginError, recentRegistrants } = useLoaderData<typeof loader>();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -55,7 +71,7 @@ export default function Home() {
 
       <main className="min-h-screen pt-24 pb-12 px-4 md:px-8 w-full max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start lg:items-center min-h-[calc(100vh-140px)]">
-          <Hero mounted={mounted} />
+          <Hero mounted={mounted} recentRegistrants={recentRegistrants} />
           <AuthForm mounted={mounted} loginError={loginError} />
         </div>
       </main>

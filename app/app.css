@@ -79,3 +79,16 @@ body {
 .form-input-error {
   @apply border-red-500/50 focus:border-red-500 focus:ring-red-500;
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}

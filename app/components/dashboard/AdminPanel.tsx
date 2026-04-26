@@ -19,7 +19,7 @@ export function AdminPanel({ pendingUsers, onReviewUser }: AdminPanelProps) {
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-display font-semibold text-white/90">
-              Dashboard Admin
+              Verifikasi Pendaftar Baru
             </h1>
             <p className="text-white/50 text-sm md:text-base mt-1">
               Kelola verifikasi pendaftar baru Dicoding Community Network

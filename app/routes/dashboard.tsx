@@ -5,7 +5,6 @@ import { IconLogout } from "@tabler/icons-react";
 import { ProfileCard } from "../components/dashboard/ProfileCard";
 import { StatusCard } from "../components/dashboard/StatusCard";
 import { BiodataForm } from "../components/dashboard/BiodataForm";
-import { AdminPanel } from "../components/dashboard/AdminPanel";
 import { getSupabaseMainAdmin, supabase } from "../lib/supabase/supabase";
 import { requireActiveUser } from "~/lib/Requireactiveuser";
 
@@ -85,7 +84,7 @@ export async function action({ request }: Route.ActionArgs) {
   return null;
 }
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Dashboard Kontributor DCN Universitas Madura" },
     {
@@ -94,6 +93,8 @@ export function meta({}: Route.MetaArgs) {
     },
   ];
 }
+
+import { AdminDashboard } from "../components/dashboard/admin/AdminDashboard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -201,6 +202,18 @@ export default function Dashboard() {
 
   if (!mounted) return null;
 
+  if (userData.isAdmin) {
+    return (
+      <AdminDashboard
+        mounted={mounted}
+        userData={userData}
+        pendingUsers={pendingUsers}
+        onReviewUser={handleReviewUser}
+        onBiodataSuccess={handleBiodataSuccess}
+      />
+    );
+  }
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 md:px-8 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-md">
@@ -226,29 +239,22 @@ export default function Dashboard() {
       </nav>
 
       <main className="min-h-screen pt-28 pb-12 px-4 md:px-8 max-w-6xl mx-auto">
-        {userData.isAdmin ? (
-          <AdminPanel
-            pendingUsers={pendingUsers}
-            onReviewUser={handleReviewUser}
-          />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <ProfileCard mounted={mounted} userData={userData} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <ProfileCard mounted={mounted} userData={userData} />
 
-            <div
-              className={`lg:col-span-8 flex flex-col gap-6 transition-all duration-700 delay-200 transform ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-            >
-              <StatusCard
-                status={userData.status}
-                isProfileComplete={userData.isProfileComplete}
-              />
-              <BiodataForm
-                isProfileComplete={userData.isProfileComplete}
-                onSuccess={handleBiodataSuccess}
-              />
-            </div>
+          <div
+            className={`lg:col-span-8 flex flex-col gap-6 transition-all duration-700 delay-200 transform ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
+            <StatusCard
+              status={userData.status}
+              isProfileComplete={userData.isProfileComplete}
+            />
+            <BiodataForm
+              isProfileComplete={userData.isProfileComplete}
+              onSuccess={handleBiodataSuccess}
+            />
           </div>
-        )}
+        </div>
       </main>
     </>
   );

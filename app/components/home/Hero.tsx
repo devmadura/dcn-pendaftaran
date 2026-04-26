@@ -3,9 +3,10 @@ import { cn } from "../../lib/utils";
 
 interface HeroProps {
   mounted: boolean;
+  recentRegistrants?: string[];
 }
 
-export function Hero({ mounted }: HeroProps) {
+export function Hero({ mounted, recentRegistrants = [] }: HeroProps) {
   return (
     <div className="w-full lg:w-1/2 flex flex-col gap-8 order-2 lg:order-1 pt-8 lg:pt-0 pb-10 lg:pb-0">
       <div
@@ -14,10 +15,26 @@ export function Hero({ mounted }: HeroProps) {
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         )}
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-medium tracking-widest text-[#f472b6] uppercase mb-6">
-          <IconSparkles size={14} />
-          <span>Portal DCN UNIRA</span>
-        </div>
+        {recentRegistrants.length > 0 && (
+          <div className="overflow-hidden border border-white/10 bg-white/5 py-2 mb-10 rounded-xl relative w-full flex items-center">
+            <div className="w-8 shrink-0 flex items-center justify-center bg-white/5 h-full absolute left-0 z-10 backdrop-blur-sm border-r border-white/10">
+              <IconSparkles size={16} className="text-[#f472b6]" />
+            </div>
+            <div className="flex whitespace-nowrap animate-marquee items-center pl-10 text-sm font-medium text-white/80 w-max">
+              {recentRegistrants.map((name, i) => (
+                <span key={i} className="mx-4">
+                  <span className="text-primary-light">{name}</span> telah mendaftar di DCN UNIRA
+                </span>
+              ))}
+              {recentRegistrants.map((name, i) => (
+                <span key={`dup-${i}`} className="mx-4" aria-hidden="true">
+                  <span className="text-primary-light">{name}</span> telah mendaftar di DCN UNIRA
+                </span>
+              ))}
+            </div>
+            <div className="w-8 shrink-0 bg-gradient-to-l from-[#0a0a0f] to-transparent h-full absolute right-0 z-10 pointer-events-none" />
+          </div>
+        )}
 
         <h1 className="text-5xl md:text-6xl lg:text-[4rem] font-display font-bold leading-[1.1] mb-6">
           Portal Kontributor <br />
@@ -26,11 +43,12 @@ export function Hero({ mounted }: HeroProps) {
           </em>
         </h1>
 
-        <p className="text-lg text-white/70 max-w-lg mb-12 font-light leading-relaxed">
+        <p className="text-lg text-white/70 max-w-lg mb-8 font-light leading-relaxed">
           Platform pendaftaran dan seleksi kontributor resmi dan portal
           kontributor. Silakan masuk atau buat akun baru untuk memulai
           perjalananmu.
         </p>
+
 
         <div className="flex flex-col gap-6">
           {[

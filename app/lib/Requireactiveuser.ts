@@ -13,7 +13,7 @@ export async function requireActiveUser(request: Request) {
   }
   const { data: profile, error: profileError } = await supabase
     .from("accounts")
-    .select("status, nim, angkatan,prodi")
+    .select("status, nim, angkatan, prodi")
     .eq("user_id", user.id)
     .single();
 
