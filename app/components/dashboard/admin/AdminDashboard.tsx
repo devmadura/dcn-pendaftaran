@@ -3,6 +3,7 @@ import { AdminLayout } from "./AdminLayout";
 import { AdminPanel } from "../AdminPanel";
 import { ProfileCard } from "../ProfileCard";
 import { BiodataForm } from "../BiodataForm";
+import { CoreTeamManager } from "./CoreTeamManager";
 import { IconDeviceDesktopAnalytics, IconActivityHeartbeat } from "@tabler/icons-react";
 
 interface AdminDashboardProps {
@@ -64,6 +65,12 @@ export function AdminDashboard({
                pendingUsers={pendingUsers}
                onReviewUser={onReviewUser}
             />
+          </div>
+        )}
+
+        {activeTab === "Pendaftaran Core Team" && (
+          <div className="space-y-6">
+            <CoreTeamManager />
           </div>
         )}
 

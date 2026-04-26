@@ -5,6 +5,7 @@ import { IconLogout } from "@tabler/icons-react";
 import { ProfileCard } from "../components/dashboard/ProfileCard";
 import { StatusCard } from "../components/dashboard/StatusCard";
 import { BiodataForm } from "../components/dashboard/BiodataForm";
+import { CoreTeamRegistrationForm } from "../components/dashboard/CoreTeamRegistrationForm";
 import { getSupabaseMainAdmin, supabase } from "../lib/supabase/supabase";
 import { requireActiveUser } from "~/lib/Requireactiveuser";
 
@@ -109,9 +110,12 @@ export default function Dashboard() {
     prodi: "",
     isProfileComplete: false,
     isAdmin: false,
+    user_id: "",
   });
 
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
+  const [isCoreTeamRegistrationOpen, setIsCoreTeamRegistrationOpen] = useState(false);
+  const [coreTeamRegistration, setCoreTeamRegistration] = useState<any>(null);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -148,6 +152,7 @@ export default function Dashboard() {
             profile.prodi
           ),
           isAdmin,
+          user_id: session.user.id,
         });
 
         if (isAdmin) {
@@ -158,6 +163,22 @@ export default function Dashboard() {
             .order("created_at", { ascending: false });
 
           if (pendingData) setPendingUsers(pendingData);
+        } else {
+          // Fetch core team settings
+          const { data: settings } = await supabase
+            .from("core_team_settings")
+            .select("is_open")
+            .eq("id", 1)
+            .maybeSingle();
+          if (settings) setIsCoreTeamRegistrationOpen(settings.is_open);
+
+          // Fetch core team registration
+          const { data: registration } = await supabase
+            .from("core_team_registrations")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          if (registration) setCoreTeamRegistration(registration);
         }
       }
       setMounted(true);
@@ -253,6 +274,14 @@ export default function Dashboard() {
               isProfileComplete={userData.isProfileComplete}
               onSuccess={handleBiodataSuccess}
             />
+            {userData.isProfileComplete && (isCoreTeamRegistrationOpen || coreTeamRegistration) && (
+              <CoreTeamRegistrationForm
+                userId={userData.user_id}
+                isOpen={isCoreTeamRegistrationOpen}
+                registration={coreTeamRegistration}
+                onSuccess={(data) => setCoreTeamRegistration(data)}
+              />
+            )}
           </div>
         </div>
       </main>

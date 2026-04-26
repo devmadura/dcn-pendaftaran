@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IconLayoutDashboard, IconUsers, IconUser, IconSettings, IconMenu2, IconX, IconLogout } from "@tabler/icons-react";
+import { IconLayoutDashboard, IconUsers, IconUser, IconMenu2, IconX, IconLogout } from "@tabler/icons-react";
 import { cn } from "../../../lib/utils";
 import { supabase } from "../../../lib/supabase/supabase";
 import { useNavigate } from "react-router";
@@ -22,6 +22,7 @@ export function AdminLayout({ children, activeTab, setActiveTab }: AdminLayoutPr
   const menuItems = [
     { name: "Dashboard", icon: <IconLayoutDashboard size={20} /> },
     { name: "Verifikasi Pengguna", icon: <IconUsers size={20} /> },
+    { name: "Pendaftaran Core Team", icon: <IconUser size={20} /> },
     { name: "Profil Core Team", icon: <IconUser size={20} /> },
   ];
 
@@ -29,7 +30,7 @@ export function AdminLayout({ children, activeTab, setActiveTab }: AdminLayoutPr
     <div className="flex min-h-screen bg-[#0a0a0f] text-white">
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -44,8 +45,8 @@ export function AdminLayout({ children, activeTab, setActiveTab }: AdminLayoutPr
           <div className="flex items-center gap-4">
             <img src="/dcn-unira.png" alt="DCN" className="w-10 h-10 object-contain" />
             <div>
-               <h2 className="font-display font-medium text-white shadow-sm">DCN UNIRA</h2>
-               <p className="text-xs bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-emerald-400 font-semibold tracking-wide uppercase mt-0.5">Core Team Panel</p>
+              <h2 className="font-display font-medium text-white shadow-sm">DCN UNIRA</h2>
+              <p className="text-xs bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-emerald-400 font-semibold tracking-wide uppercase mt-0.5">Core Team Panel</p>
             </div>
           </div>
           <button className="md:hidden text-white/50 hover:bg-white/10 p-2 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
@@ -65,8 +66,8 @@ export function AdminLayout({ children, activeTab, setActiveTab }: AdminLayoutPr
                 }}
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 group cursor-pointer",
-                  activeTab === item.name 
-                    ? "bg-gradient-to-r from-purple-500/20 to-transparent text-purple-300 border border-purple-500/20 shadow-[inset_4px_0_0_0_rgba(168,85,247,0.5)]" 
+                  activeTab === item.name
+                    ? "bg-gradient-to-r from-purple-500/20 to-transparent text-purple-300 border border-purple-500/20 shadow-[inset_4px_0_0_0_rgba(168,85,247,0.5)]"
                     : "text-white/60 hover:text-white hover:bg-white/5 border border-transparent"
                 )}
               >
@@ -80,7 +81,7 @@ export function AdminLayout({ children, activeTab, setActiveTab }: AdminLayoutPr
         </div>
 
         <div className="p-6 border-t border-white/5">
-           <button
+          <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer"
           >
@@ -105,13 +106,13 @@ export function AdminLayout({ children, activeTab, setActiveTab }: AdminLayoutPr
 
         {/* Dynamic Content Wrapper */}
         <div className="flex-1 p-4 md:p-10">
-           <div className="max-w-5xl mx-auto">
-             <div className="mb-8">
-               <h1 className="text-3xl font-display font-semibold text-white/90">{activeTab}</h1>
-               <div className="h-1 w-12 bg-gradient-to-r from-purple-500 to-emerald-500 rounded-full mt-3"></div>
-             </div>
-             {children}
-           </div>
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-display font-semibold text-white/90">{activeTab}</h1>
+              <div className="h-1 w-12 bg-gradient-to-r from-purple-500 to-emerald-500 rounded-full mt-3"></div>
+            </div>
+            {children}
+          </div>
         </div>
       </main>
     </div>
